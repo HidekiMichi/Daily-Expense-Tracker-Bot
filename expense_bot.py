@@ -68,17 +68,27 @@ async def add(ctx, amount: float, *, description: str):
     date = datetime.datetime.now().strftime("%Y-%m-%d")
     desc_lower = description.lower()
     detected_category = "others"
+
     for category, keywords in CATEGORY_KEYWORDS.items():
         if any(keyword in desc_lower for keyword in keywords):
             detected_category = category
             break
+
     async with aiosqlite.connect('expenses.db') as db:
         await db.execute('''
             INSERT INTO expenses (user_id, amount, category, description, date)
             VALUES (?, ?, ?, ?, ?)
         ''', (ctx.author.id, amount, detected_category, description, date))
         await db.commit()
-    await ctx.send(f"Added ₹{amount} under **{detected_category}** ({description})")
+
+        # Get the ID of the newly added expense
+        cursor = await db.execute('SELECT last_insert_rowid()')
+        row = await cursor.fetchone()
+        expense_id = row[0]
+
+    await ctx.send(
+        f"✅ Added ₹{amount} under **{detected_category}** (`{description}`) — ID: `{expense_id}`"
+    )
 
 @bot.command()
 async def remove(ctx, expense_id: int):
@@ -94,6 +104,34 @@ async def remove(ctx, expense_id: int):
         await db.execute('DELETE FROM expenses WHERE id = ?', (expense_id,))
         await db.commit()
     await ctx.send(f"Expense with ID {expense_id} has been removed.")
+
+@bot.command()
+async def list(ctx):
+    async with aiosqlite.connect('expenses.db') as db:
+        cursor = await db.execute(
+            'SELECT id, amount, category, description, date FROM expenses WHERE user_id = ? ORDER BY date DESC',
+            (ctx.author.id,)
+        )
+        rows = await cursor.fetchall()
+
+    if not rows:
+        await ctx.send("You don't have any expenses saved yet.")
+        return
+
+    # Build the list as a message
+    message_lines = ["📋 **Your Expenses:**"]
+    for row in rows:
+        expense_id, amount, category, description, date = row
+        message_lines.append(
+            f"• ID: `{expense_id}` | ₹{amount} | {category} | \"{description}\" on {date}"
+        )
+
+    # Discord message limit: 2000 characters
+    message = "\n".join(message_lines)
+    if len(message) > 2000:
+        await ctx.send("Too many expenses to display! Try filtering or exporting.")
+    else:
+        await ctx.send(message)
 
 @bot.command()
 async def balance(ctx):
