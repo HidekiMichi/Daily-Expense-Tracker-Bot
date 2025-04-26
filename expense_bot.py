@@ -22,7 +22,8 @@ CATEGORY_KEYWORDS = {
     "groceries": ["supermarket", "groceries", "vegetables", "fruits", "store"],
     "entertainment": ["netflix", "cinema", "movie", "concert", "game", "pubg"],
     "shopping": ["amazon", "flipkart", "clothes", "shopping", "electronics"],
-    "miscellaneous": ["misc", "other", "miscellaneous", "random", "various"]
+    "miscellaneous": ["misc", "other", "miscellaneous", "random", "various"],
+    "Octopus Card": ["octopus", "octopus card", "octopus card topup", "octopus card recharge", "OctopusCard", "octopuscard", "Octopuscard"],
 }
 
 @bot.event
