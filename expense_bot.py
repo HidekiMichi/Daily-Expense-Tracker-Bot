@@ -21,7 +21,8 @@ CATEGORY_KEYWORDS = {
     "transport": ["uber", "taxi", "train", "bus", "fuel", "petrol", "MTR", "mtr","Mtr", "Metro"],
     "groceries": ["supermarket", "groceries", "vegetables", "fruits", "store"],
     "entertainment": ["netflix", "cinema", "movie", "concert", "game", "pubg"],
-    "shopping": ["amazon", "flipkart", "clothes", "shopping", "electronics"]
+    "shopping": ["amazon", "flipkart", "clothes", "shopping", "electronics"],
+    "miscellaneous": ["misc", "other", "miscellaneous", "random", "various"]
 }
 
 @bot.event
