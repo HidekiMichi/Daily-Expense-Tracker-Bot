@@ -145,11 +145,11 @@ async def pdf_report(ctx):
     pdf.ln(10)
     total = 0
     for amount, category, description, date in rows:
-        pdf.cell(0, 10, txt=f"{date} | ₹{amount} | {category} | {description}", ln=True)
+        pdf.cell(0, 10, txt=f"{date} | HKD{amount} | {category} | {description}", ln=True)
         total += amount
     pdf.ln(10)
     pdf.set_font("Arial", 'B', size=12)
-    pdf.cell(0, 10, txt=f"Total Spent: ₹{total:.2f}", ln=True)
+    pdf.cell(0, 10, txt=f"Total Spent: HKD{total:.2f}", ln=True)
     buf = io.BytesIO()
     pdf.output(buf)
     buf.seek(0)
