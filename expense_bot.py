@@ -35,7 +35,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 TOKEN = os.getenv('TOKEN')
 
 CATEGORY_KEYWORDS = {
-    "food": ["lunch", "dinner", "breakfast", "restaurant", "kfc", "dominos", "burger", "pizza", "McDonald's", "Snacks"],
+    "food": ["lunch", "Food", "food","dinner", "breakfast", "restaurant", "kfc", "dominos", "burger", "pizza", "McDonald's", "Snacks"],
     "transport": ["uber", "taxi", "train", "bus", "fuel", "petrol", "MTR", "mtr", "Mtr", "Metro"],
     "groceries": ["supermarket", "groceries", "vegetables", "fruits", "store"],
     "entertainment": ["netflix", "cinema", "movie", "concert", "game", "pubg"],
@@ -161,7 +161,7 @@ async def report(ctx):
         return
     category_totals = {}
     for amount, category in rows:
-        category_totals[category] = category_totals.get(category, 0) + amount
+        category_totals[category] = category_totals.get(category, 0) + float(amount)
     categories = list(category_totals.keys())
     amounts = list(category_totals.values())
     plt.figure(figsize=(6,6))
