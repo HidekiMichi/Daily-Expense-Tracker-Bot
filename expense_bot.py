@@ -1,3 +1,5 @@
+# ----------------------------------------
+# imports
 import discord
 from discord.ext import commands
 import aiosqlite
@@ -6,25 +8,44 @@ import matplotlib.pyplot as plt
 import io
 import os
 from fpdf import FPDF
+from flask import Flask
+from threading import Thread
 
+# ----------------------------------------
+# flask server to keep port open
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Hello. I'm alive!"
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+# ----------------------------------------
+# discord bot setup
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-
-
 TOKEN = os.getenv('TOKEN')
-  # Replace this with your bot token
 
 CATEGORY_KEYWORDS = {
-    "food": ["lunch", "dinner", "breakfast", "restaurant", "kfc", "dominos", "burger", "pizza", "McDonald's","Snacks"],
-    "transport": ["uber", "taxi", "train", "bus", "fuel", "petrol", "MTR", "mtr","Mtr", "Metro"],
+    "food": ["lunch", "dinner", "breakfast", "restaurant", "kfc", "dominos", "burger", "pizza", "McDonald's", "Snacks"],
+    "transport": ["uber", "taxi", "train", "bus", "fuel", "petrol", "MTR", "mtr", "Mtr", "Metro"],
     "groceries": ["supermarket", "groceries", "vegetables", "fruits", "store"],
     "entertainment": ["netflix", "cinema", "movie", "concert", "game", "pubg"],
     "shopping": ["amazon", "flipkart", "clothes", "shopping", "electronics"],
     "miscellaneous": ["misc", "other", "miscellaneous", "random", "various"],
-    "Octopus Card": ["octopus", "octopus card", "octopus card topup", "octopus card recharge", "OctopusCard", "octopuscard", "Octopuscard"],
+    "Octopus Card": ["octopus", "octopus card", "octopuscard", "Octopuscard", "Octopus Card", "Octopus"],
 }
+
+# ----------------------------------------
+# discord bot events
 
 @bot.event
 async def on_ready():
@@ -134,4 +155,7 @@ async def pdf_report(ctx):
     buf.seek(0)
     await ctx.send(file=discord.File(fp=buf, filename="expense_report.pdf"))
 
+# ----------------------------------------
+# start the web server + bot
+keep_alive()
 bot.run(TOKEN)
