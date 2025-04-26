@@ -150,6 +150,7 @@ async def balance(ctx):
 async def report(ctx):
     now = datetime.datetime.now()
     month = now.strftime("%Y-%m")
+    
     async with aiosqlite.connect('expenses.db') as db:
         cursor = await db.execute('''
             SELECT amount, category FROM expenses
@@ -165,8 +166,12 @@ async def report(ctx):
     for amount, category in rows:
         category_totals[category] = category_totals.get(category, 0) + float(amount)
 
+    # Ensure we pass actual lists, not coroutines
     categories = list(category_totals.keys())
-    amounts = [float(a) for a in category_totals.values()]  # 👈 Safe float cast added here
+    amounts = list(category_totals.values())
+
+    # DEBUG: Print to console to verify types (optional)
+    # print(f"Categories: {categories} ({type(categories)}), Amounts: {amounts} ({type(amounts)})")
 
     # Create the pie chart
     plt.figure(figsize=(6, 6))
