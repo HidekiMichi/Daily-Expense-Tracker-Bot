@@ -156,24 +156,33 @@ async def report(ctx):
             WHERE user_id = ? AND date LIKE ?
         ''', (ctx.author.id, f'{month}%'))
         rows = await cursor.fetchall()
+
     if not rows:
         await ctx.send("No expenses found for this month.")
         return
+
     category_totals = {}
     for amount, category in rows:
         category_totals[category] = category_totals.get(category, 0) + float(amount)
+
     categories = list(category_totals.keys())
-    amounts = list(category_totals.values())
-    plt.figure(figsize=(6,6))
+    amounts = [float(a) for a in category_totals.values()]  # 👈 Safe float cast added here
+
+    # Create the pie chart
+    plt.figure(figsize=(6, 6))
     plt.pie(amounts, labels=categories, autopct='%1.1f%%', startangle=140)
     plt.title(f"Expenses Breakdown - {now.strftime('%B %Y')}")
     plt.tight_layout()
+
+    # Save and send image
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
     plt.close()
     file = discord.File(fp=buf, filename='report.png')
     await ctx.send(file=file)
+
+    # Send the summary
     total = sum(amounts)
     summary = "\n".join([f"**{cat}**: ₹{amt:.2f}" for cat, amt in category_totals.items()])
     await ctx.send(f"📅 **Monthly Summary for {now.strftime('%B %Y')}**\n\n{summary}\n\n**Total**: ₹{total:.2f}")
