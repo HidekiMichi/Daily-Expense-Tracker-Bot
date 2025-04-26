@@ -81,6 +81,21 @@ async def add(ctx, amount: float, *, description: str):
     await ctx.send(f"Added ₹{amount} under **{detected_category}** ({description})")
 
 @bot.command()
+async def remove(ctx, expense_id: int):
+    async with aiosqlite.connect('expenses.db') as db:
+        cursor = await db.execute('SELECT user_id FROM expenses WHERE id = ?', (expense_id,))
+        row = await cursor.fetchone()
+        if not row:
+            await ctx.send(f"No expense found with ID {expense_id}.")
+            return
+        if row[0] != ctx.author.id:
+            await ctx.send("You can only remove your own expenses.")
+            return
+        await db.execute('DELETE FROM expenses WHERE id = ?', (expense_id,))
+        await db.commit()
+    await ctx.send(f"Expense with ID {expense_id} has been removed.")
+
+@bot.command()
 async def balance(ctx):
     now = datetime.datetime.now()
     month = now.strftime("%Y-%m")
