@@ -150,8 +150,8 @@ async def pdf_report(ctx):
     pdf.ln(10)
     pdf.set_font("Arial", 'B', size=12)
     pdf.cell(0, 10, txt=f"Total Spent: HKD{total:.2f}", ln=True)
-    buf = io.BytesIO()
-    pdf.output(buf)
+    pdf_bytes = pdf.output(dest='S').encode('latin1')
+    buf = io.BytesIO(pdf_bytes)
     buf.seek(0)
     await ctx.send(file=discord.File(fp=buf, filename="expense_report.pdf"))
 
