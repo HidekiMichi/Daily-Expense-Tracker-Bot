@@ -164,30 +164,37 @@ async def report(ctx):
 
     category_totals = {}
     for amount, category in rows:
-        category_totals[category] = category_totals.get(category, 0) + float(amount)
+        try:
+            amount = float(amount)
+        except ValueError:
+            continue  # skip invalid values
+        category_totals[category] = category_totals.get(category, 0) + amount
 
-    # Ensure we pass actual lists, not coroutines
     categories = list(category_totals.keys())
     amounts = list(category_totals.values())
 
-    # DEBUG: Print to console to verify types (optional)
-    # print(f"Categories: {categories} ({type(categories)}), Amounts: {amounts} ({type(amounts)})")
+    if not amounts or sum(amounts) == 0:
+        await ctx.send("All recorded expenses this month are ₹0. Nothing to show in chart.")
+        return
 
-    # Create the pie chart
-    plt.figure(figsize=(6, 6))
-    plt.pie(amounts, labels=categories, autopct='%1.1f%%', startangle=140)
-    plt.title(f"Expenses Breakdown - {now.strftime('%B %Y')}")
-    plt.tight_layout()
+    # Create the pie chart safely
+    try:
+        plt.figure(figsize=(6, 6))
+        plt.pie(amounts, labels=categories, autopct='%1.1f%%', startangle=140)
+        plt.title(f"Expenses Breakdown - {now.strftime('%B %Y')}")
+        plt.tight_layout()
 
-    # Save and send image
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    plt.close()
-    file = discord.File(fp=buf, filename='report.png')
-    await ctx.send(file=file)
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        plt.close()
+        file = discord.File(fp=buf, filename='report.png')
+        await ctx.send(file=file)
+    except Exception as e:
+        await ctx.send(f"❌ Error generating pie chart: {e}")
+        return
 
-    # Send the summary
+    # Send summary
     total = sum(amounts)
     summary = "\n".join([f"**{cat}**: ₹{amt:.2f}" for cat, amt in category_totals.items()])
     await ctx.send(f"📅 **Monthly Summary for {now.strftime('%B %Y')}**\n\n{summary}\n\n**Total**: ₹{total:.2f}")
